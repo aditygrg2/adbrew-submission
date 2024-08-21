@@ -15,7 +15,7 @@ services:
   app:
     build: .
     container_name: app
-    command: bash -c "cd /src/app && nvm install --lts && nvm use --lts && npm install && npm audit fix --force && npm run start"
+    command: bash -c "cd /src/app && npm install && npm run start"
     ports:
       - "3000:3000"
     volumes:

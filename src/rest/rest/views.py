@@ -2,22 +2,20 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-import json, logging, os
-from pymongo import MongoClient
+import logging
 from bson import ObjectId
 from datetime import datetime
-
-# MongoDB setup
-mongo_uri = 'mongodb://' + os.environ.get("MONGO_HOST", "localhost") + ':' + os.environ.get("MONGO_PORT", "27017")
-db = MongoClient(mongo_uri)['test_db']
-todos_collection = db['todos']
+from .dbconfig import db
 
 class TodoListView(APIView):
+    def __init__(self) -> None:
+        self.collection = db['todos']
+        super().__init__()
 
     def get(self, _):
         # Implement this method - return all todo items from db instance above.
         try:
-            todos = list(todos_collection.find({}).sort('timestamp', 1))
+            todos = list(self.collection.find({}).sort('timestamp', 1))
             todos = [{'text': todo['text'], '_id': str(todo['_id']), 'timestamp': str(todo['timestamp'])} for todo in todos]
             return Response(todos, status=status.HTTP_200_OK)
         except Exception as e:
@@ -28,6 +26,7 @@ class TodoListView(APIView):
         # Implement this method - accept a todo item in a mongo collection, persist it using db instance above.
         try:
             todo_text = request.data.get('text')
+
             if not todo_text:
                 return Response({"error": "Todo text is required"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -36,20 +35,21 @@ class TodoListView(APIView):
                 'timestamp': datetime.utcnow()
             }
 
-            result = todos_collection.insert_one(todo_item)
+            result = self.collection.insert_one(todo_item)
 
             return Response({
                 '_id': str(result.inserted_id),
                 'text': todo_text,
                 'timestamp': str(todo_item['timestamp'])
             }, status=status.HTTP_201_CREATED)
+            
         except Exception as e:
             logging.error(f"Error saving todo: {e}")
             return Response({"error": "Error saving todo"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, _, id):
         try:
-            result = todos_collection.delete_one({'_id': ObjectId(id)})
+            result = self.collection.delete_one({'_id': ObjectId(id)})
             if result.deleted_count == 0:
                 return Response({"error": "Todo not found"}, status=status.HTTP_404_NOT_FOUND)
             return Response({"message": "Todo deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
@@ -63,7 +63,7 @@ class TodoListView(APIView):
             if not todo_text:
                 return Response({"error": "Todo text is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-            result = todos_collection.update_one(
+            result = self.collection.update_one(
                 {'_id': ObjectId(id)},
                 {'$set': {'text': todo_text, 'timestamp': datetime.utcnow()}}
             )

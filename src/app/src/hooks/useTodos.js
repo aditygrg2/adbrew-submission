@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { SERVER_URL } from './constants';
+import { SERVER_URL } from '../constants';
 import axios from 'axios';
 
 const API_URL = `${SERVER_URL}/todos/`;

@@ -1,8 +1,10 @@
-./tmp
-./test
 ./src/app/node_modules
 ./src/app
 
 .npm
-.DS_Store
-./src/.DS_Store
+/src/.DS_Store
+
+/test
+/tmp
+/db
+/.DS_Store

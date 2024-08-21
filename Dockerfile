@@ -17,7 +17,7 @@ RUN apt-get -y update
 RUN apt-get install -y mongodb-org
 
 # Install Yarn
-RUN apt-get install -y yarn
+RUN apt-get install -y npm
 
 # Install PIP
 RUN python3 -m pip install --upgrade pip
