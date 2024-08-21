@@ -1,0 +1,6 @@
+./tmp
+./test
+./src/app/node_modules
+./src/app
+
+.npm
